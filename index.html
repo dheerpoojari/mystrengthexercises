@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back-Safe Strength Circuit</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Back-Safe">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2C4A3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F3EE;
+    --ink:#20261F;
+    --panel:#FFFFFF;
+    --line:#DCD8CC;
+    --safe:#3E7A52;
+    --safe-bg:#E4EFE6;
+    --caution:#B5651D;
+    --caution-bg:#F5E6D8;
+    --accent:#2C4A3E;
+    --muted:#6B6659;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Sans 3', sans-serif;
+    line-height:1.5;
+    padding-bottom:60px;
+  }
+  h1,h2,h3,.display{
+    font-family:'Barlow Condensed', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+  }
+  header{
+    background:var(--accent);
+    color:var(--paper);
+    padding:28px 20px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:180px;height:180px;
+    border:2px solid rgba(245,243,238,0.15);
+    border-radius:50%;
+  }
+  header h1{
+    font-size:clamp(28px,6vw,40px);
+    font-weight:800;
+    margin:0 0 4px;
+    line-height:0.95;
+  }
+  header p{
+    margin:0;
+    font-size:15px;
+    color:#D7DFD3;
+    max-width:560px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px;}
+  .banner{
+    background:var(--safe-bg);
+    border:1px solid var(--safe);
+    color:#234230;
+    border-radius:10px;
+    padding:14px 16px;
+    margin:20px 0;
+    font-size:14px;
+  }
+  .banner b{color:var(--safe);}
+  .banner.caution{background:var(--caution-bg);border-color:var(--caution);color:#5C3413;}
+  .banner.caution b{color:var(--caution);}
+  .section-label{
+    font-size:13px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:600;
+    margin:34px 0 8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .equip-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+  @media(max-width:520px){.equip-grid{grid-template-columns:1fr;}}
+  .equip-grid .item{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:14px;
+  }
+  .equip-grid .item b{display:block;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+
+  .ex-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .ex-head{
+    padding:14px 16px 10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .ex-num{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent);
+    letter-spacing:.08em;
+  }
+  .ex-name{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:22px;
+    font-weight:700;
+    margin:2px 0 0;
+  }
+  .ex-tag{
+    font-size:12px;
+    background:var(--safe-bg);
+    color:var(--safe);
+    border:1px solid var(--safe);
+    padding:3px 9px;
+    border-radius:99px;
+    white-space:nowrap;
+    font-weight:600;
+  }
+  .ex-video{
+    position:relative;
+    width:100%;
+    padding-top:56.25%;
+    background:#000;
+    display:block;
+    text-decoration:none;
+  }
+  .ex-video img{
+    position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;
+  }
+  .ex-video .play{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:60px;height:60px;border-radius:50%;
+    background:rgba(0,0,0,0.55);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ex-video .play svg{width:22px;height:22px;}
+  .ex-video .watch-label{
+    position:absolute;bottom:8px;right:10px;
+    font-size:12px;color:#fff;background:rgba(0,0,0,0.55);
+    padding:3px 9px;border-radius:99px;font-weight:600;
+  }
+  .ex-body{padding:12px 16px 16px;font-size:14.5px;}
+  .ex-body .meta{
+    display:flex;flex-wrap:wrap;gap:16px;
+    margin-bottom:8px;
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:15px;
+  }
+  .ex-body .meta span b{color:var(--accent);}
+  .ex-body .why{color:#33392f;}
+  .ex-body .avoid{
+    margin-top:8px;
+    font-size:13.5px;
+    color:var(--caution);
+  }
+
+  /* Timer */
+  .timer-box{
+    background:var(--accent);
+    color:var(--paper);
+    border-radius:14px;
+    padding:22px 20px;
+    text-align:center;
+    margin:24px 0;
+  }
+  .timer-box .phase{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:14px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#B9C7B4;
+    margin-bottom:4px;
+  }
+  .timer-box .current{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:clamp(26px,7vw,38px);
+    font-weight:800;
+    margin:0 0 6px;
+  }
+  .timer-box .clock{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:64px;
+    font-weight:700;
+    line-height:1;
+    margin:6px 0 14px;
+  }
+  .timer-box .next{font-size:13px;color:#B9C7B4;margin-bottom:14px;}
+  .btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  button{
+    font-family:'Source Sans 3',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    border-radius:8px;
+    border:none;
+    padding:11px 20px;
+    cursor:pointer;
+  }
+  .btn-primary{background:#EFE9DA;color:var(--accent);}
+  .btn-primary:hover{background:#fff;}
+  .btn-secondary{background:rgba(255,255,255,0.12);color:var(--paper);}
+  .btn-secondary:hover{background:rgba(255,255,255,0.22);}
+  .progress-bar{
+    height:5px;background:rgba(255,255,255,0.18);border-radius:99px;overflow:hidden;margin-bottom:16px;
+  }
+  .progress-fill{height:100%;background:#EFE9DA;width:0%;transition:width .3s linear;}
+
+  table.dumbbell{
+    width:100%;border-collapse:collapse;font-size:14px;margin-top:8px;
+  }
+  table.dumbbell th,table.dumbbell td{
+    text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);
+  }
+  table.dumbbell th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;}
+
+  footer{
+    max-width:760px;margin:30px auto 0;padding:0 18px;font-size:12.5px;color:var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap" style="padding:0;">
+    <h1>Back-Safe Strength Circuit</h1>
+    <p>35 minutes. Dumbbells + one resistance band. Every move below is chosen to keep your lumbar spine neutral — no flexion-under-load, no heavy axial compression.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="banner caution">
+    <b>Confirmed from your MRI (08/12/2025):</b> L4-L5 has a posterior central annular tear with mild disc extrusion and right-sided nerve root abutment. L5-S1 has a left paracentral annular fissure with left-sided abutment. Whole-spine screening also shows loss of cervical lordosis with disc dehydration at every cervical level (no cervical bulge). This is more specific than "disc bulge" — an annular tear and extrusion mean the disc's outer ring is compromised, so the flexion/rotation/compression rules below aren't precautionary, they're load-bearing. This is not a diagnosis or treatment plan — it's a lay reading of the radiologist's report to shape exercise selection. Your physio/ortho's restrictions override anything here.
+  </div>
+
+  <div class="banner">
+    <b>Rule this circuit follows:</b> no sit-ups/crunches, no loaded spinal flexion or twisting, no standing overhead work without support, no heavy axial loading (squats/deadlifts done heavy), neutral neck throughout (given the cervical findings — don't crank your head up or let it hang in any move below). Every "avoid" note below tells you exactly what mistake would break that rule.
+  </div>
+
+  <div class="banner caution">
+    <b>Stop-rule:</b> with confirmed nerve root abutment on both sides (right at L4-L5, left at L5-S1), any tingling, numbness, or shooting pain into either leg during a move means stop that exercise for the day — don't push through it hoping it clears up. Muscle fatigue and burn are fine; nerve-type pain is not.
+  </div>
+
+  <div class="section-label">Equipment</div>
+  <div class="card">
+    <div style="font-size:14px;">You need: <b>dumbbells</b> (below), your <b>resistance band</b>, and floor space with a mat. A sturdy chair helps for the seated press.</div>
+    <table class="dumbbell">
+      <tr><th>Pair</th><th>Use for</th><th>Suggested load</th></tr>
+      <tr><td>Light</td><td>Lateral raises, dead bug reach</td><td>2–4 kg</td></tr>
+      <tr><td>Moderate</td><td>Floor press, shoulder press</td><td>6–10 kg</td></tr>
+      <tr><td>Bridge weight</td><td>Glute bridge (rests on hips, not gripped overhead)</td><td>8–12 kg (one DB)</td></tr>
+    </table>
+    <div style="font-size:13.5px;margin-top:10px;color:var(--muted);">
+      [Guessing — untested strength] Since you don't own any yet, the most space-efficient buy is one <b>adjustable pair, 2–12 kg per hand</b> (e.g. Kore, PowerMax Fitness, or Cockatoo adjustable dumbbell sets sold in India) rather than 3 fixed pairs — you'll dial the plates up/down between exercises. If cost is a factor, a fixed 6 kg pair alone still covers 5 of 8 exercises here.
+    </div>
+  </div>
+
+  <div class="section-label">Warm-up · 5 min</div>
+  <div class="card" style="font-size:14.5px;">
+    <div style="display:grid;gap:8px;">
+      <div>1. Marching in place — 1 min</div>
+      <div>2. Cat-Cow (slow, small range, let your neck follow your spine rather than cranking it up or dropping it) — 1 min · <a href="https://www.youtube.com/watch?v=1Y0YjXS9sKI" target="_blank" style="color:var(--accent);">watch form ↗</a></div>
+      <div>3. Band pull-apart, light tension — 1 min · <a href="https://www.youtube.com/watch?v=2fmxGGtdbog" target="_blank" style="color:var(--accent);">watch form ↗</a></div>
+      <div>4. Standing hip circles / gentle leg swings — 1 min</div>
+      <div>5. Arm circles + shoulder rolls — 1 min</div>
+    </div>
+  </div>
+
+  <div class="section-label">Main circuit · 3 rounds · ~25 min</div>
+  <p style="font-size:14px;color:var(--muted);margin-top:-4px;">45 sec work / 15 sec rest per move, 45 sec rest between rounds. The timer below runs the whole thing — or just work through the cards at your own pace.</p>
+
+  <div id="exercise-list"></div>
+
+  <div class="section-label">Cool-down · 5 min</div>
+  <div class="card" style="font-size:14.5px;">
+    <div style="display:grid;gap:8px;">
+      <div>1. Standing chest stretch in a doorway — 60 sec</div>
+      <div>2. Standing quad stretch (hold a wall for balance) — 60 sec/side</div>
+      <div>3. Seated hamstring stretch, back tall, hinge from hips not spine — 60 sec/side</div>
+      <div>4. Gentle standing cat-cow to finish — 60 sec</div>
+    </div>
+  </div>
+
+  <div class="section-label">Guided timer</div>
+  <div class="timer-box">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="phase" id="phaseLabel">Ready</div>
+    <div class="current" id="currentLabel">Press start when you are</div>
+    <div class="clock" id="clockLabel">35:00</div>
+    <div class="next" id="nextLabel"></div>
+    <div class="btn-row">
+      <button class="btn-primary" id="startBtn">Start workout</button>
+      <button class="btn-secondary" id="pauseBtn" style="display:none;">Pause</button>
+      <button class="btn-secondary" id="skipBtn" style="display:none;">Skip</button>
+      <button class="btn-secondary" id="resetBtn" style="display:none;">Reset</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Built for a specific lumbar constraint you described (L4-L5 bulge, S1-S2 involvement) — not a general-purpose program. If any move causes pain (not muscle fatigue — actual sharp/nerve pain, especially radiating down the leg), stop that move and don't push through it.
+</footer>
+
+<script>
+const exercises = [
+  {
+    name:"Dumbbell Floor Press",
+    tag:"Chest / Triceps",
+    video:"AqYFvc9t_vU",
+    meta:"12–15 reps, moderate DB pair",
+    why:"Lying flat means the floor supports your entire spine — zero lumbar load, and the limited range protects the shoulder too.",
+    avoid:"Don't arch your lower back off the floor to get more range — keep it pressed flat throughout."
+  },
+  {
+    name:"Bird Dog",
+    tag:"Core / Spine stability",
+    video:"ZdAHe9_HeEw",
+    meta:"8–10 reps per side, slow",
+    why:"Trains your spine to stay still while your limbs move — the exact skill a bulging disc needs, without any load on it.",
+    avoid:"Don't let your hips rotate or your low back sag/arch as you extend arm and leg — move slowly enough to control it. Keep your neck in line with your spine, not cranked up. Any tingling down a leg — stop and switch exercises."
+  },
+  {
+    name:"Seated Resistance Band Row",
+    tag:"Upper back",
+    video:"LSkyinhmA8k",
+    meta:"12–15 reps, band anchored at feet",
+    why:"Upright seated posture with a stable base — pulls load through your arms and back, never through your spine.",
+    avoid:"Don't round forward to get more stretch or lean back to help the pull — stay tall throughout."
+  },
+  {
+    name:"Dumbbell Glute Bridge",
+    tag:"Glutes / Hamstrings",
+    video:"wPM8icPu6H8",
+    meta:"12–15 reps, DB rested on hip crease",
+    why:"Builds the hip and glute strength that actually takes load off an irritated lower back during daily movement.",
+    avoid:"Stop the lift where your body forms a straight line shoulder-to-knee — don't overextend or arch past that to lift higher."
+  },
+  {
+    name:"Standing Band Pallof Press",
+    tag:"Core / Anti-rotation",
+    video:"AH_QZLm_0-s",
+    meta:"10 reps per side, slow press-out",
+    why:"Trains your core to resist twisting — a disc bulge is far more sensitive to rotation than to straight-line effort.",
+    avoid:"Keep hips and shoulders square the whole time — if the band is winning and twisting you, step closer to the anchor."
+  },
+  {
+    name:"Seated Dumbbell Shoulder Press",
+    tag:"Shoulders",
+    video:"fuQpuu--bMI",
+    meta:"10–12 reps, moderate DB pair",
+    why:"Sitting against back support (chair back or wall) removes the lower-back arch that standing overhead pressing tends to create.",
+    avoid:"Don't press from a standing position without back support, and don't let your ribs flare/back arch as arms go overhead."
+  },
+  {
+    name:"Dead Bug with DB Reach",
+    tag:"Core (deep abdominals)",
+    video:"bxn9FBrt4-A",
+    meta:"8–10 reps per side, light DB",
+    why:"Same spine-sparing logic as bird dog, done on your back — low back stays pinned to the floor the entire time.",
+    avoid:"The moment your low back arches off the floor, that's your range limit for today — stop there, don't force the leg lower. Any tingling or numbness down a leg — stop for the day."
+  },
+  {
+    name:"Standing Band Lateral Raise",
+    tag:"Shoulders",
+    video:"gfEyrmxbCbw",
+    meta:"12–15 reps, band underfoot",
+    why:"Isolated shoulder work with a soft knee bend — no spinal loading, just delts.",
+    avoid:"Don't lean your torso back to swing the weight up — raise only as high as you can without arching."
+  }
+];
+
+const listEl = document.getElementById('exercise-list');
+exercises.forEach((ex,i)=>{
+  const card = document.createElement('div');
+  card.className = 'ex-card';
+  card.innerHTML = `
+    <div class="ex-head">
+      <div>
+        <div class="ex-num">MOVE ${i+1} OF ${exercises.length}</div>
+        <div class="ex-name">${ex.name}</div>
+      </div>
+      <div class="ex-tag">${ex.tag}</div>
+    </div>
+    <a class="ex-video" href="https://www.youtube.com/watch?v=${ex.video}" target="_blank" rel="noopener">
+      <img src="https://img.youtube.com/vi/${ex.video}/hqdefault.jpg" alt="${ex.name} form video thumbnail" loading="lazy">
+      <div class="play"><svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+      <div class="watch-label">Watch on YouTube ↗</div>
+    </a>
+    <div class="ex-body">
+      <div class="meta"><span><b>${ex.meta}</b></span></div>
+      <div class="why">${ex.why}</div>
+      <div class="avoid"><b>Avoid:</b> ${ex.avoid}</div>
+    </div>
+  `;
+  listEl.appendChild(card);
+});
+
+// ---- Timer engine ----
+const WORK = 45, REST = 15, ROUND_REST = 45, ROUNDS = 3;
+const WARMUP_ITEMS = ["Marching in place","Cat-Cow","Band pull-apart","Hip circles / leg swings","Arm circles + shoulder rolls"];
+const COOLDOWN_ITEMS = ["Doorway chest stretch","Standing quad stretch","Seated hamstring stretch","Standing cat-cow"];
+
+function buildSequence(){
+  const seq = [];
+  WARMUP_ITEMS.forEach(name=>seq.push({phase:"Warm-up", label:name, dur:60}));
+  for(let r=1;r<=ROUNDS;r++){
+    exercises.forEach(ex=>{
+      seq.push({phase:`Round ${r} of ${ROUNDS}`, label:ex.name, dur:WORK, work:true});
+      seq.push({phase:`Round ${r} of ${ROUNDS}`, label:"Rest", dur:REST, rest:true});
+    });
+    if(r<ROUNDS) seq.push({phase:"Between rounds", label:"Rest", dur:ROUND_REST, rest:true});
+  }
+  COOLDOWN_ITEMS.forEach(name=>seq.push({phase:"Cool-down", label:name, dur:60}));
+  return seq;
+}
+const sequence = buildSequence();
+const totalDuration = sequence.reduce((a,s)=>a+s.dur,0);
+
+let idx = -1, remaining = 0, timerId = null, running = false, elapsedTotal = 0;
+
+const phaseLabel = document.getElementById('phaseLabel');
+const currentLabel = document.getElementById('currentLabel');
+const clockLabel = document.getElementById('clockLabel');
+const nextLabel = document.getElementById('nextLabel');
+const progressFill = document.getElementById('progressFill');
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const skipBtn = document.getElementById('skipBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+function fmt(s){
+  const m = Math.floor(s/60), sec = s%60;
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+function renderIdle(){
+  phaseLabel.textContent = "Ready";
+  currentLabel.textContent = "Press start when you are";
+  clockLabel.textContent = fmt(totalDuration);
+  nextLabel.textContent = `Total: ${Math.round(totalDuration/60)} min`;
+  progressFill.style.width = "0%";
+}
+renderIdle();
+
+function loadStep(){
+  if(idx >= sequence.length){
+    phaseLabel.textContent = "Done";
+    currentLabel.textContent = "Workout complete";
+    clockLabel.textContent = "0:00";
+    nextLabel.textContent = "Nice work.";
+    progressFill.style.width = "100%";
+    running = false;
+    pauseBtn.style.display = "none";
+    skipBtn.style.display = "none";
+    startBtn.style.display = "inline-block";
+    startBtn.textContent = "Restart";
+    clearInterval(timerId);
+    return;
+  }
+  const step = sequence[idx];
+  remaining = step.dur;
+  phaseLabel.textContent = step.phase;
+  currentLabel.textContent = step.rest ? "Rest" : step.label;
+  const nxt = sequence[idx+1];
+  nextLabel.textContent = nxt ? `Next: ${nxt.rest ? 'Rest' : nxt.label}` : "Final stretch";
+  updateClock();
+}
+
+function updateClock(){
+  clockLabel.textContent = fmt(remaining);
+  progressFill.style.width = `${Math.min(100, (elapsedTotal/totalDuration)*100)}%`;
+}
+
+function tick(){
+  remaining--;
+  elapsedTotal++;
+  if(remaining < 0){
+    idx++;
+    loadStep();
+    return;
+  }
+  updateClock();
+}
+
+startBtn.addEventListener('click', ()=>{
+  if(idx >= sequence.length){ idx = -1; elapsedTotal = 0; startBtn.textContent = "Start workout"; }
+  idx = 0;
+  loadStep();
+  running = true;
+  startBtn.style.display = "none";
+  pauseBtn.style.display = "inline-block";
+  pauseBtn.textContent = "Pause";
+  skipBtn.style.display = "inline-block";
+  resetBtn.style.display = "inline-block";
+  timerId = setInterval(tick, 1000);
+});
+
+pauseBtn.addEventListener('click', ()=>{
+  if(running){
+    clearInterval(timerId);
+    running = false;
+    pauseBtn.textContent = "Resume";
+  } else {
+    timerId = setInterval(tick, 1000);
+    running = true;
+    pauseBtn.textContent = "Pause";
+  }
+});
+
+skipBtn.addEventListener('click', ()=>{
+  elapsedTotal += remaining + 1;
+  idx++;
+  loadStep();
+});
+
+resetBtn.addEventListener('click', ()=>{
+  clearInterval(timerId);
+  running = false;
+  idx = -1;
+  elapsedTotal = 0;
+  startBtn.style.display = "inline-block";
+  startBtn.textContent = "Start workout";
+  pauseBtn.style.display = "none";
+  skipBtn.style.display = "none";
+  resetBtn.style.display = "none";
+  renderIdle();
+});
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+
+</body>
+</html>
